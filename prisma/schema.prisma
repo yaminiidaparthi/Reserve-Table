@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id        String   @id @default(cuid())
+  employeeId String  @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  assignments Assignment[]
+}
+
+model Table {
+  id        String   @id @default(cuid())
+  tableNumber String @unique
+  capacity  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  assignments Assignment[]
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  employeeId  String
+  tableNumber String
+  assignedAt  DateTime @default(now())
+  status      String   @default("active") // active, cancelled
+  
+  employee    Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+  table       Table    @relation(fields: [tableNumber], references: [tableNumber], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([employeeId, tableNumber, status])
+  @@index([employeeId])
+  @@index([tableNumber])
+}
+
